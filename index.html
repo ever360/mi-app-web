@@ -1,24 +1,77 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Registro de Clientes</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>POS Básico con Supabase</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 600px; margin: 2rem auto; }
+  input, button { padding: 0.5rem; margin: 0.3rem 0; width: 100%; }
+  table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Registro de Clientes</h1>
-    <form id="formulario">
-      <input type="text" id="nombre" placeholder="Nombre completo" required />
-      <input type="email" id="correo" placeholder="Correo electrónico" required />
-      <input type="tel" id="telefono" placeholder="Teléfono" required />
-      <button type="submit">Registrar</button>
-    </form>
 
-    <h2>Clientes registrados</h2>
-    <ul id="lista-clientes"></ul>
-  </div>
-  <script src="script.js"></script>
+<h2>Inventario de Productos</h2>
+
+<form id="producto-form">
+  <input type="text" id="nombre" placeholder="Nombre del producto" required />
+  <input type="number" id="precio" placeholder="Precio" step="0.01" min="0" required />
+  <input type="number" id="stock" placeholder="Stock" min="0" required />
+  <button type="submit">Agregar Producto</button>
+</form>
+
+<table id="tabla-productos">
+  <thead>
+    <tr><th>Nombre</th><th>Precio</th><th>Stock</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  // Tus credenciales Supabase:
+  const supabaseUrl = 'https://wpxeosncrkhdolxqnglq.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndweGVvc25jcmtoZG9seHFuZ2xxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwNTU5MzAsImV4cCI6MjA2NDYzMTkzMH0.5v6M5qjqPTNG6F9QSLlGtKcyhIiBG1gnUHM75t0X_VE';
+
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+  const form = document.getElementById('producto-form');
+  const tablaBody = document.querySelector('#tabla-productos tbody');
+
+  async function cargarProductos() {
+    const { data, error } = await supabase.from('productos').select();
+    if (error) return alert('Error al cargar productos: ' + error.message);
+    tablaBody.innerHTML = '';
+    data.forEach(({ nombre, precio, stock }) => {
+      const fila = `<tr>
+        <td>${nombre}</td>
+        <td>${precio}</td>
+        <td>${stock}</td>
+      </tr>`;
+      tablaBody.innerHTML += fila;
+    });
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const nombre = document.getElementById('nombre').value.trim();
+    const precio = parseFloat(document.getElementById('precio').value);
+    const stock = parseInt(document.getElementById('stock').value);
+
+    if (!nombre || precio < 0 || stock < 0) return alert('Datos inválidos');
+
+    const { error } = await supabase.from('productos').insert([{ nombre, precio, stock }]);
+    if (error) return alert('Error al agregar producto: ' + error.message);
+
+    form.reset();
+    cargarProductos();
+  });
+
+  cargarProductos();
+</script>
+
 </body>
 </html>
+
