@@ -2,104 +2,129 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>POS Básico con Supabase</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard AppSheet Style</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 2rem auto;
-      padding: 1rem;
-    }
-    input, button {
-      padding: 0.5rem;
-      margin: 0.3rem 0;
-      width: 100%;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 0.5rem;
-      text-align: left;
-    }
+    body { background-color: #f4f6f8; font-family: 'Inter', sans-serif; }
+    .card { background: white; border-radius: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); padding: 1.5rem; }
+    .sidebar { background-color: #111827; color: white; width: 240px; height: 100vh; position: fixed; left: 0; top: 0; }
+    .menu-item { display: flex; align-items: center; gap: .75rem; padding: .75rem 1rem; border-radius: .5rem; cursor: pointer; }
+    .menu-item:hover { background-color: #1f2937; }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
+  <!-- Sidebar -->
+  <div class="sidebar flex flex-col p-4">
+    <h2 class="text-2xl font-bold mb-8 text-center text-blue-400">Mi Panel</h2>
+    <div class="menu-item" onclick="mostrarSeccion('inicio')">
+      <i data-lucide="home"></i><span>Inicio</span>
+    </div>
+    <div class="menu-item" onclick="mostrarSeccion('ventas')">
+      <i data-lucide="shopping-cart"></i><span>Ventas</span>
+    </div>
+    <div class="menu-item" onclick="mostrarSeccion('gastos')">
+      <i data-lucide="wallet"></i><span>Gastos</span>
+    </div>
+    <div class="menu-item" onclick="mostrarSeccion('reportes')">
+      <i data-lucide="bar-chart-3"></i><span>Reportes</span>
+    </div>
+  </div>
 
-  <h2>Inventario de Productos 1.0</h2> 
+  <!-- Contenido -->
+  <div class="ml-[260px] p-6">
+    <h1 class="text-3xl font-bold text-gray-700 mb-6" id="titulo">Inicio</h1>
 
-  <form id="producto-form">
-    <input type="text" id="nombre" placeholder="Nombre del producto" required />
-    <input type="number" id="precio" placeholder="Precio" step="0.01" min="0" required />
-    <input type="number" id="stock" placeholder="Stock" min="0" required />
-    <button type="submit">Agregar Producto</button>
-  </form>
+    <!-- Inicio -->
+    <div id="inicio" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="card">
+        <h3 class="text-gray-600 mb-2 flex items-center gap-2"><i data-lucide="dollar-sign"></i> Ventas del día</h3>
+        <p class="text-2xl font-bold text-gray-800">$1,250</p>
+      </div>
+      <div class="card">
+        <h3 class="text-gray-600 mb-2 flex items-center gap-2"><i data-lucide="package"></i> Artículos vendidos</h3>
+        <p class="text-2xl font-bold text-gray-800">42</p>
+      </div>
+      <div class="card">
+        <h3 class="text-gray-600 mb-2 flex items-center gap-2"><i data-lucide="users"></i> Clientes atendidos</h3>
+        <p class="text-2xl font-bold text-gray-800">15</p>
+      </div>
+    </div>
 
-  <table id="tabla-productos">
-    <thead>
-      <tr><th>Nombre</th><th>Precio</th><th>Stock</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <!-- Ventas -->
+    <div id="ventas" class="hidden">
+      <div class="card">
+        <h3 class="text-xl font-semibold mb-4 flex items-center gap-2"><i data-lucide="shopping-cart"></i> Ventas recientes</h3>
+        <table class="min-w-full text-left border-t">
+          <thead>
+            <tr class="text-gray-500">
+              <th class="py-2">Cliente</th>
+              <th>Fecha</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t"><td>Juan Pérez</td><td>15/10/2025</td><td>$350</td></tr>
+            <tr class="border-t"><td>María López</td><td>15/10/2025</td><td>$210</td></tr>
+            <tr class="border-t"><td>Pedro Díaz</td><td>15/10/2025</td><td>$690</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
+    <!-- Gastos -->
+    <div id="gastos" class="hidden">
+      <div class="card">
+        <h3 class="text-xl font-semibold mb-4 flex items-center gap-2"><i data-lucide="wallet"></i> Gastos del día</h3>
+        <ul class="list-disc pl-5 text-gray-700">
+          <li>Transporte: $50</li>
+          <li>Insumos: $120</li>
+          <li>Servicios: $75</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Reportes -->
+    <div id="reportes" class="hidden">
+      <div class="card">
+        <h3 class="text-xl font-semibold mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3"></i> Reporte semanal</h3>
+        <canvas id="grafico"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // ✅ Tus credenciales de Supabase
-    const supabaseUrl = 'https://wpxeosncrkhdolxqnglq.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndweGVvc25jcmtoZG9seHFuZ2xxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwNTU5MzAsImV4cCI6MjA2NDYzMTkzMH0.5v6M5qjqPTNG6F9QSLlGtKcyhIiBG1gnUHM75t0X_VE';
+    lucide.createIcons();
 
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-    const form = document.getElementById('producto-form');
-    const tablaBody = document.querySelector('#tabla-productos tbody');
-
-    async function cargarProductos() {
-      const { data, error } = await supabase.from('productos').select();
-      if (error) {
-        alert('Error al cargar productos: ' + error.message);
-        return;
-      }
-
-      tablaBody.innerHTML = '';
-      data.forEach(({ nombre, precio, stock }) => {
-        const fila = `<tr>
-          <td>${nombre}</td>
-          <td>${precio}</td>
-          <td>${stock}</td>
-        </tr>`;
-        tablaBody.innerHTML += fila;
+    function mostrarSeccion(id) {
+      document.getElementById("titulo").textContent = id.charAt(0).toUpperCase() + id.slice(1);
+      ["inicio", "ventas", "gastos", "reportes"].forEach(sec => {
+        document.getElementById(sec).classList.toggle("hidden", sec !== id);
       });
+      lucide.createIcons();
     }
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const nombre = document.getElementById('nombre').value.trim();
-      const precio = parseFloat(document.getElementById('precio').value);
-      const stock = parseInt(document.getElementById('stock').value);
-
-      if (!nombre || isNaN(precio) || isNaN(stock) || precio < 0 || stock < 0) {
-        alert('Por favor ingresa datos válidos.');
-        return;
-      }
-
-      const { error } = await supabase.from('productos').insert([{ nombre, precio, stock }]);
-
-      if (error) {
-        alert('Error al agregar producto: ' + error.message);
-      } else {
-        form.reset();
-        cargarProductos();
+    // Gráfico
+    const ctx = document.getElementById("grafico");
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+        datasets: [{
+          label: "Ventas ($)",
+          data: [250, 400, 300, 450, 500, 700, 650],
+          borderWidth: 1,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        scales: { y: { beginAtZero: true } },
+        plugins: { legend: { display: false } }
       }
     });
-
-    // Cargar productos al iniciar
-    cargarProductos();
   </script>
-
 </body>
 </html>
