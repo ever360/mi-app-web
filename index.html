@@ -1,162 +1,187 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>💳 App de Préstamos 1</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      background: linear-gradient(180deg, #0ea5e9, #0369a1);
-      min-height: 100vh;
-    }
-    .card {
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-    }
-    .fade-in {
-      animation: fade 0.3s ease-in-out;
-    }
-    @keyframes fade {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💳 App de Préstamos</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body { background: #f1f5f9; font-family: 'Inter', sans-serif; }
+.card { transition: transform .2s; }
+.card:hover { transform: translateY(-4px); }
+.slide-in { animation: slide .25s ease-in-out; }
+@keyframes slide { from {opacity:0;transform:translateX(-20px)} to {opacity:1;transform:translateX(0)} }
+#sidebar { transition: transform .3s ease-in-out; }
+#sidebar.hidden { transform: translateX(-100%); }
+</style>
 </head>
-<body class="flex flex-col items-center p-4 text-gray-800">
+<body class="overflow-x-hidden">
 
-  <header class="text-center text-white mt-4 mb-6">
-    <h1 class="text-3xl font-bold">💳 App de Préstamos</h1>
-    <p class="text-sm opacity-80">Gestión rápida y moderna</p>
-  </header>
+<!-- HEADER -->
+<header class="bg-blue-600 text-white p-4 flex items-center justify-between">
+  <button id="menuBtn" class="text-2xl">☰</button>
+  <h1 class="text-xl font-bold">Préstamos App</h1>
+  <span class="text-sm opacity-80">Ever</span>
+</header>
 
-  <main id="app" class="w-full max-w-lg space-y-4"></main>
-
-  <!-- Modal -->
-  <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white p-6 rounded-2xl w-80 shadow-xl fade-in">
-      <h2 class="text-xl font-bold text-center mb-3">Registrar pago</h2>
-      <p id="modalClient" class="text-center text-gray-600 mb-3"></p>
-      <form id="paymentForm" class="space-y-3">
-        <input type="number" id="paymentAmount" placeholder="Monto" class="border rounded-lg w-full p-2 text-center focus:ring focus:ring-blue-300" required />
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white w-full py-2 rounded-lg font-semibold">💰 Guardar pago</button>
-      </form>
-      <button id="cancelBtn" class="mt-3 text-sm text-gray-500 w-full hover:text-gray-700">Cancelar</button>
-    </div>
+<!-- SIDEBAR -->
+<aside id="sidebar" class="hidden fixed inset-y-0 left-0 bg-white shadow-xl w-64 z-50 slide-in">
+  <div class="p-4 border-b">
+    <h2 class="font-bold text-lg text-blue-600">Menú</h2>
   </div>
+  <nav class="p-4 space-y-3 text-gray-700">
+    <button onclick="navigate('inicio')" class="w-full text-left hover:text-blue-600">🏠 Inicio</button>
+    <button onclick="navigate('clientes')" class="w-full text-left hover:text-blue-600">👥 Clientes</button>
+    <button onclick="navigate('historial')" class="w-full text-left hover:text-blue-600">📜 Historial</button>
+    <button onclick="navigate('config')" class="w-full text-left hover:text-blue-600">⚙️ Configuración</button>
+  </nav>
+  <div class="absolute bottom-0 w-full p-4 border-t text-sm text-gray-500">v1.0.0 © 2025</div>
+</aside>
 
-  <footer class="mt-6 text-xs text-white opacity-70">© 2025 App Préstamos • Desarrollada con 💙</footer>
+<!-- OVERLAY -->
+<div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-40 z-40"></div>
 
-  <script>
-    const loans = [
-      {
-        id: 1,
-        client: "Carlos Gómez",
-        amount: 1000,
-        balance: 700,
-        payments: [
-          { date: "2025-11-01", amount: 100 },
-          { date: "2025-11-05", amount: 200 },
-        ],
-      },
-      {
-        id: 2,
-        client: "Ana Pérez",
-        amount: 800,
-        balance: 300,
-        payments: [{ date: "2025-11-03", amount: 250 }],
-      },
-      {
-        id: 3,
-        client: "Luis Díaz",
-        amount: 1200,
-        balance: 800,
-        payments: [],
-      },
-    ];
+<!-- MAIN CONTENT -->
+<main id="content" class="p-4 mt-2 space-y-4"></main>
 
-    const app = document.getElementById("app");
-    const modal = document.getElementById("modal");
-    const modalClient = document.getElementById("modalClient");
-    const paymentForm = document.getElementById("paymentForm");
-    const paymentAmount = document.getElementById("paymentAmount");
-    const cancelBtn = document.getElementById("cancelBtn");
-    let currentLoan = null;
+<!-- MODAL PAGO -->
+<div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-2xl w-80 shadow-xl slide-in">
+    <h2 class="text-xl font-bold text-center mb-3 text-blue-700">Registrar pago</h2>
+    <p id="modalClient" class="text-center text-gray-600 mb-3"></p>
+    <form id="paymentForm" class="space-y-3">
+      <input type="number" id="paymentAmount" placeholder="Monto" class="border rounded-lg w-full p-2 text-center focus:ring focus:ring-blue-300" required />
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white w-full py-2 rounded-lg font-semibold">💰 Guardar pago</button>
+    </form>
+    <button id="cancelBtn" class="mt-3 text-sm text-gray-500 w-full hover:text-gray-700">Cancelar</button>
+  </div>
+</div>
 
-    function renderLoans() {
-      app.innerHTML = "";
-      loans.forEach((loan) => {
-        const card = document.createElement("div");
-        card.className =
-          "card bg-white p-4 rounded-2xl shadow-md fade-in";
+<script>
+// ---------------- DATOS ----------------
+const loans = [
+  { id:1, client:"Carlos Gómez", amount:1000, balance:700, payments:[{date:"2025-11-01",amount:100},{date:"2025-11-05",amount:200}] },
+  { id:2, client:"Ana Pérez", amount:800, balance:300, payments:[{date:"2025-11-03",amount:250}] },
+  { id:3, client:"Luis Díaz", amount:1200, balance:800, payments:[] },
+];
 
-        card.innerHTML = `
-          <div class="flex justify-between items-center mb-2">
-            <h2 class="text-lg font-semibold">${loan.client}</h2>
-            <span class="text-sm text-gray-500">#${loan.id}</span>
-          </div>
-          <p>Monto: <b>$${loan.amount}</b></p>
-          <p>Saldo: <b class="text-blue-600">$${loan.balance}</b></p>
+const clients = ["Carlos Gómez","Ana Pérez","Luis Díaz"];
+let currentLoan = null;
 
-          <div class="mt-3 flex gap-2">
-            <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-sm font-semibold" onclick="openModal(${loan.id})">💵 Pago</button>
-            <button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-sm font-semibold" onclick="toggleHistory(${loan.id})">📜 Historial</button>
-          </div>
+// ---------------- ELEMENTOS ----------------
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+const menuBtn = document.getElementById("menuBtn");
+const content = document.getElementById("content");
+const modal = document.getElementById("modal");
+const modalClient = document.getElementById("modalClient");
+const paymentForm = document.getElementById("paymentForm");
+const paymentAmount = document.getElementById("paymentAmount");
+const cancelBtn = document.getElementById("cancelBtn");
 
-          <div id="history-${loan.id}" class="hidden mt-3 border-t pt-2 text-sm">
-            ${
-              loan.payments.length === 0
-                ? `<p class="text-gray-400 italic">Sin pagos registrados</p>`
-                : loan.payments
-                    .map(
-                      (p) =>
-                        `<div class="flex justify-between">
-                          <span>${p.date}</span>
-                          <span class="font-medium">$${p.amount}</span>
-                        </div>`
-                    )
-                    .join("")
-            }
-          </div>
-        `;
-        app.appendChild(card);
-      });
-    }
+// ---------------- MENÚ ----------------
+menuBtn.onclick = () => toggleMenu();
+overlay.onclick = () => toggleMenu();
+function toggleMenu(){ sidebar.classList.toggle("hidden"); overlay.classList.toggle("hidden"); }
 
-    function toggleHistory(id) {
-      const el = document.getElementById(`history-${id}`);
-      el.classList.toggle("hidden");
-    }
+// ---------------- NAVEGACIÓN ----------------
+function navigate(section){
+  toggleMenu();
+  if(section==="inicio") renderInicio();
+  if(section==="clientes") renderClientes();
+  if(section==="historial") renderHistorial();
+  if(section==="config") renderConfig();
+}
 
-    function openModal(id) {
-      currentLoan = loans.find((l) => l.id === id);
-      modalClient.innerText = currentLoan.client;
-      modal.classList.remove("hidden");
-    }
+// ---------------- PANTALLAS ----------------
+function renderInicio(){
+  content.innerHTML = `
+    <div class="text-center mb-3">
+      <h2 class="text-2xl font-bold text-blue-700">Resumen General</h2>
+      <p class="text-gray-500 text-sm">Préstamos activos y saldo total</p>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-blue-600 text-white p-4 rounded-xl shadow text-center">
+        <p class="text-sm opacity-70">Activos</p>
+        <h3 class="text-2xl font-bold">${loans.length}</h3>
+      </div>
+      <div class="bg-green-600 text-white p-4 rounded-xl shadow text-center">
+        <p class="text-sm opacity-70">Total prestado</p>
+        <h3 class="text-2xl font-bold">$${loans.reduce((a,b)=>a+b.amount,0)}</h3>
+      </div>
+    </div>
+    <h3 class="mt-6 mb-2 font-bold text-gray-700">Últimos préstamos</h3>
+    ${loans.map(l=>`
+      <div class="card bg-white p-4 rounded-xl shadow">
+        <div class="flex justify-between">
+          <h4 class="font-semibold">${l.client}</h4>
+          <span class="text-sm text-gray-500">#${l.id}</span>
+        </div>
+        <p>Monto: <b>$${l.amount}</b></p>
+        <p>Saldo: <b class="text-blue-600">$${l.balance}</b></p>
+      </div>`).join("")}
+  `;
+}
 
-    paymentForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const amount = Number(paymentAmount.value);
-      if (amount > 0 && currentLoan) {
-        const today = new Date().toISOString().split("T")[0];
-        currentLoan.payments.push({ date: today, amount });
-        currentLoan.balance -= amount;
-        renderLoans();
-        closeModal();
-        alert("✅ Pago registrado correctamente");
-      }
-    });
+function renderClientes(){
+  content.innerHTML = `<h2 class="text-xl font-bold text-blue-700 mb-3">👥 Clientes</h2>`+
+    clients.map(c=>`<div class="card bg-white p-4 rounded-xl shadow">${c}</div>`).join("");
+}
 
-    cancelBtn.addEventListener("click", closeModal);
-    function closeModal() {
-      modal.classList.add("hidden");
-      paymentAmount.value = "";
-    }
+function renderHistorial(){
+  content.innerHTML = `<h2 class="text-xl font-bold text-blue-700 mb-3">📜 Préstamos y Pagos</h2>`+
+  loans.map(l=>`
+    <div class="card bg-white p-4 rounded-xl shadow mb-3">
+      <div class="flex justify-between mb-2">
+        <h4 class="font-semibold">${l.client}</h4>
+        <span class="text-sm text-gray-500">Saldo: $${l.balance}</span>
+      </div>
+      <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm" onclick="openModal(${l.id})">Registrar Pago</button>
+      <button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm ml-2" onclick="toggleHistory(${l.id})">Historial</button>
+      <div id="history-${l.id}" class="hidden mt-3 border-t pt-2 text-sm">
+        ${
+          l.payments.length===0
+          ? `<p class="text-gray-400 italic">Sin pagos</p>`
+          : l.payments.map(p=>`<div class="flex justify-between"><span>${p.date}</span><span>$${p.amount}</span></div>`).join("")
+        }
+      </div>
+    </div>`).join("");
+}
 
-    renderLoans();
-  </script>
+function renderConfig(){
+  content.innerHTML=`
+    <h2 class="text-xl font-bold text-blue-700 mb-3">⚙️ Configuración</h2>
+    <div class="bg-white p-4 rounded-xl shadow">
+      <p><b>Usuario:</b> Ever Flórez</p>
+      <p><b>Email:</b> florezever360@gmail.com</p>
+      <p><b>Sucursal:</b> Medellín</p>
+      <button class="bg-red-500 hover:bg-red-600 text-white w-full mt-4 py-2 rounded">Cerrar Sesión</button>
+    </div>`;
+}
+
+// ---------------- PAGO ----------------
+function toggleHistory(id){ document.getElementById(`history-${id}`).classList.toggle("hidden"); }
+function openModal(id){
+  currentLoan = loans.find(l=>l.id===id);
+  modalClient.innerText = currentLoan.client;
+  modal.classList.remove("hidden");
+}
+cancelBtn.onclick = closeModal;
+function closeModal(){ modal.classList.add("hidden"); paymentAmount.value=""; }
+paymentForm.onsubmit = (e)=>{
+  e.preventDefault();
+  const amount = Number(paymentAmount.value);
+  if(amount>0 && currentLoan){
+    const today = new Date().toISOString().split("T")[0];
+    currentLoan.payments.push({date:today,amount});
+    currentLoan.balance -= amount;
+    alert("✅ Pago registrado con éxito");
+    closeModal(); renderHistorial();
+  }
+};
+
+// ---------------- INICIAL ----------------
+renderInicio();
+</script>
 </body>
 </html>
