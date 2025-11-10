@@ -3,26 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>App de Préstamos</title>
+  <title>💳 App de Préstamos</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(180deg, #0ea5e9, #0369a1);
+      min-height: 100vh;
+    }
+    .card {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+    .fade-in {
+      animation: fade 0.3s ease-in-out;
+    }
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+<body class="flex flex-col items-center p-4 text-gray-800">
 
-  <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">💳 App de Préstamos</h1>
+  <header class="text-center text-white mt-4 mb-6">
+    <h1 class="text-3xl font-bold">💳 App de Préstamos</h1>
+    <p class="text-sm opacity-80">Gestión rápida y moderna</p>
+  </header>
 
-  <div id="app" class="w-full max-w-md space-y-4"></div>
+  <main id="app" class="w-full max-w-lg space-y-4"></main>
 
   <!-- Modal -->
-  <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-    <div class="bg-white p-6 rounded-xl w-80">
-      <h2 class="text-lg font-bold mb-3">Registrar pago</h2>
-      <form id="paymentForm">
-        <input type="number" id="paymentAmount" placeholder="Monto" class="border rounded w-full p-2 mb-3" required />
-        <button type="submit" class="bg-green-600 text-white w-full py-2 rounded">Guardar pago</button>
+  <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-2xl w-80 shadow-xl fade-in">
+      <h2 class="text-xl font-bold text-center mb-3">Registrar pago</h2>
+      <p id="modalClient" class="text-center text-gray-600 mb-3"></p>
+      <form id="paymentForm" class="space-y-3">
+        <input type="number" id="paymentAmount" placeholder="Monto" class="border rounded-lg w-full p-2 text-center focus:ring focus:ring-blue-300" required />
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white w-full py-2 rounded-lg font-semibold">💰 Guardar pago</button>
       </form>
-      <button id="cancelBtn" class="mt-3 text-sm text-gray-500 w-full">Cancelar</button>
+      <button id="cancelBtn" class="mt-3 text-sm text-gray-500 w-full hover:text-gray-700">Cancelar</button>
     </div>
   </div>
+
+  <footer class="mt-6 text-xs text-white opacity-70">© 2025 App Préstamos • Desarrollada con 💙</footer>
 
   <script>
     const loans = [
@@ -41,14 +67,20 @@
         client: "Ana Pérez",
         amount: 800,
         balance: 300,
-        payments: [
-          { date: "2025-11-03", amount: 250 },
-        ],
+        payments: [{ date: "2025-11-03", amount: 250 }],
+      },
+      {
+        id: 3,
+        client: "Luis Díaz",
+        amount: 1200,
+        balance: 800,
+        payments: [],
       },
     ];
 
     const app = document.getElementById("app");
     const modal = document.getElementById("modal");
+    const modalClient = document.getElementById("modalClient");
     const paymentForm = document.getElementById("paymentForm");
     const paymentAmount = document.getElementById("paymentAmount");
     const cancelBtn = document.getElementById("cancelBtn");
@@ -58,26 +90,36 @@
       app.innerHTML = "";
       loans.forEach((loan) => {
         const card = document.createElement("div");
-        card.className = "bg-white p-4 rounded-xl shadow";
+        card.className =
+          "card bg-white p-4 rounded-2xl shadow-md fade-in";
 
         card.innerHTML = `
-          <h2 class="text-lg font-semibold">${loan.client}</h2>
-          <p>Monto: $${loan.amount}</p>
-          <p>Saldo: $${loan.balance}</p>
+          <div class="flex justify-between items-center mb-2">
+            <h2 class="text-lg font-semibold">${loan.client}</h2>
+            <span class="text-sm text-gray-500">#${loan.id}</span>
+          </div>
+          <p>Monto: <b>$${loan.amount}</b></p>
+          <p>Saldo: <b class="text-blue-600">$${loan.balance}</b></p>
 
           <div class="mt-3 flex gap-2">
-            <button class="bg-green-500 text-white px-3 py-1 rounded" onclick="openModal(${loan.id})">Registrar Pago</button>
-            <button class="bg-blue-500 text-white px-3 py-1 rounded" onclick="toggleHistory(${loan.id})">Historial</button>
+            <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-sm font-semibold" onclick="openModal(${loan.id})">💵 Pago</button>
+            <button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-sm font-semibold" onclick="toggleHistory(${loan.id})">📜 Historial</button>
           </div>
 
           <div id="history-${loan.id}" class="hidden mt-3 border-t pt-2 text-sm">
-            <h3 class="font-semibold mb-1">Historial de Pagos</h3>
-            ${loan.payments
-              .map(
-                (p) =>
-                  `<div class="flex justify-between"><span>${p.date}</span><span>$${p.amount}</span></div>`
-              )
-              .join("")}
+            ${
+              loan.payments.length === 0
+                ? `<p class="text-gray-400 italic">Sin pagos registrados</p>`
+                : loan.payments
+                    .map(
+                      (p) =>
+                        `<div class="flex justify-between">
+                          <span>${p.date}</span>
+                          <span class="font-medium">$${p.amount}</span>
+                        </div>`
+                    )
+                    .join("")
+            }
           </div>
         `;
         app.appendChild(card);
@@ -91,6 +133,7 @@
 
     function openModal(id) {
       currentLoan = loans.find((l) => l.id === id);
+      modalClient.innerText = currentLoan.client;
       modal.classList.remove("hidden");
     }
 
@@ -108,16 +151,12 @@
     });
 
     cancelBtn.addEventListener("click", closeModal);
-
     function closeModal() {
       modal.classList.add("hidden");
       paymentAmount.value = "";
     }
 
-    // Inicializar
     renderLoans();
   </script>
 </body>
 </html>
-
-
