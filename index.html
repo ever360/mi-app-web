@@ -1,429 +1,122 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dashboard V2 · AppSheet Style</title>
-
-  <!-- Tailwind CDN (utilities) -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>App de Préstamos</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Lucide icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    /* Palette variables (light + dark) */
-    :root{
-      --bg: #0b1220;
-      --panel: #0f1720;
-      --muted: #9aa6b2;
-      --text: #e6eef6;
-      --accent: #3b82f6;
-      --glass: rgba(255,255,255,0.03);
-      --card-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    }
-    :root.light{
-      --bg: #f6f8fb;
-      --panel: #ffffff;
-      --muted: #4b5563;
-      --text: #0f1720;
-      --accent: #2563eb;
-      --glass: rgba(15,23,42,0.03);
-      --card-bg: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));
-    }
-
-    html,body,#root{height:100%}
-    body{
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      margin:0;
-      background: var(--bg);
-      color: var(--text);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      transition: background .25s ease, color .25s ease;
-    }
-
-    /* Sidebar */
-    .sidebar{
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-right: 1px solid rgba(255,255,255,0.04);
-      backdrop-filter: blur(6px);
-    }
-    .sidebar .brand {
-      display:flex; gap:.75rem; align-items:center;
-      padding:.75rem;
-      font-weight:700; font-size:1.05rem;
-    }
-    .menu-item{
-      display:flex; align-items:center; gap:.75rem;
-      padding:.6rem .75rem; border-radius:.6rem; cursor:pointer;
-      transition: background .18s ease, transform .08s ease;
-      color: var(--muted);
-    }
-    .menu-item:hover{ background: rgba(255,255,255,0.02); transform: translateY(-2px); color: var(--accent); }
-    .menu-item.active{ background: rgba(59,130,246,0.10); color: var(--accent); box-shadow: 0 6px 18px rgba(2,6,23,0.45); }
-
-    /* Glass card */
-    .glass {
-      background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.04);
-      border-radius: 14px;
-      padding: 1rem;
-      transition: transform .18s ease, box-shadow .18s ease;
-    }
-    .glass:hover{ transform: translateY(-6px); box-shadow: 0 10px 30px rgba(2,6,23,0.45); }
-
-    /* Small helpers */
-    .muted { color: var(--muted); }
-    .accent { color: var(--accent); }
-    .accent-bg { background: linear-gradient(90deg, rgba(59,130,246,0.12), rgba(45,212,191,0.06)); border-radius:10px; padding:.35rem .6rem; }
-
-    /* Responsive: mobile sidebar overlay */
-    .mobile-sidebar {
-      position:fixed; inset:0; z-index:40; display:flex;
-    }
-    .mobile-backdrop{ position:absolute; inset:0; background:rgba(2,6,23,0.45); }
-    .mobile-panel{ width:260px; background:var(--panel); padding:1rem; transform: translateX(-16px); animation: slideIn .22s ease forwards; }
-    @keyframes slideIn { from { transform: translateX(-20px) scale(.99); opacity:0 } to { transform: translateX(0) scale(1); opacity:1 } }
-
-    /* small tweak for chart responsiveness */
-    .chart-wrap{ padding:.6rem; border-radius:12px; background:transparent; }
-
-    /* subtle underline */
-    .underline-accent{ box-shadow: inset 0 -2px 0 0 rgba(59,130,246,0.12); padding-bottom:.35rem; border-radius:4px; }
-
-    /* hide scrollbar for the sidebar */
-    .no-scrollbar::-webkit-scrollbar { width: 8px }
-    .no-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.04); border-radius: 10px }
-  </style>
 </head>
-<body>
-  <!-- Mobile header -->
-  <div class="lg:hidden flex items-center justify-between px-4 py-3 border-b" style="border-color:rgba(255,255,255,0.03);">
-    <div class="flex items-center gap-3">
-      <button id="btn-hamb" class="p-2 rounded-md glass" aria-label="Abrir menú">
-        <i data-lucide="menu" width="18" height="18"></i>
-      </button>
-      <div class="font-semibold">Mi Panel</div>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+
+  <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">💳 App de Préstamos</h1>
+
+  <div id="app" class="w-full max-w-md space-y-4"></div>
+
+  <!-- Modal -->
+  <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-xl w-80">
+      <h2 class="text-lg font-bold mb-3">Registrar pago</h2>
+      <form id="paymentForm">
+        <input type="number" id="paymentAmount" placeholder="Monto" class="border rounded w-full p-2 mb-3" required />
+        <button type="submit" class="bg-green-600 text-white w-full py-2 rounded">Guardar pago</button>
+      </form>
+      <button id="cancelBtn" class="mt-3 text-sm text-gray-500 w-full">Cancelar</button>
     </div>
-    <div class="flex items-center gap-2">
-      <button id="btn-theme" class="p-2 rounded-md glass" title="Cambiar tema">
-        <i data-lucide="sun" id="icon-theme" width="18" height="18"></i>
-      </button>
-      <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-teal-400 flex items-center justify-center font-bold">E</div>
-    </div>
-  </div>
-
-  <div class="min-h-screen flex">
-    <!-- Sidebar (desktop) -->
-    <aside id="sidebar" class="sidebar hidden lg:flex flex-col w-72 p-4 gap-4 sticky top-0 h-screen no-scrollbar">
-      <div class="brand">
-        <div class="w-10 h-10 rounded-lg accent-bg flex items-center justify-center font-bold text-[14px]">EV</div>
-        <div>
-          <div class="text-white">Mi Panel</div>
-          <div class="text-sm muted">Administrador</div>
-        </div>
-      </div>
-
-      <nav class="flex-1 overflow-auto">
-        <div class="menu-item active" data-section="inicio"><i data-lucide="home" width="18" height="18"></i><span>Inicio</span></div>
-        <div class="menu-item" data-section="ventas"><i data-lucide="shopping-cart" width="18" height="18"></i><span>Ventas</span></div>
-        <div class="menu-item" data-section="compras"><i data-lucide="layers" width="18" height="18"></i><span>Compras</span></div>
-        <div class="menu-item" data-section="gastos"><i data-lucide="credit-card" width="18" height="18"></i><span>Gastos</span></div>
-        <div class="menu-item" data-section="inventario"><i data-lucide="archive" width="18" height="18"></i><span>Inventario</span></div>
-        <div class="menu-item" data-section="reportes"><i data-lucide="bar-chart-2" width="18" height="18"></i><span>Reportes</span></div>
-      </nav>
-
-      <div class="text-sm muted">v2.0 · Ever</div>
-    </aside>
-
-    <!-- Mobile sidebar (hidden by default) -->
-    <div id="mobileSidebar" class="mobile-sidebar hidden lg:hidden">
-      <div class="mobile-backdrop" id="mobileBackdrop"></div>
-      <div class="mobile-panel glass">
-        <div class="brand">
-          <div class="w-10 h-10 rounded-lg accent-bg flex items-center justify-center font-bold text-[14px]">EV</div>
-          <div>
-            <div class="text-white">Mi Panel</div>
-            <div class="text-sm muted">Administrador</div>
-          </div>
-        </div>
-        <nav class="mt-4">
-          <div class="menu-item" data-section="inicio"><i data-lucide="home" width="18" height="18"></i><span>Inicio</span></div>
-          <div class="menu-item" data-section="ventas"><i data-lucide="shopping-cart" width="18" height="18"></i><span>Ventas</span></div>
-          <div class="menu-item" data-section="compras"><i data-lucide="layers" width="18" height="18"></i><span>Compras</span></div>
-          <div class="menu-item" data-section="gastos"><i data-lucide="credit-card" width="18" height="18"></i><span>Gastos</span></div>
-          <div class="menu-item" data-section="inventario"><i data-lucide="archive" width="18" height="18"></i><span>Inventario</span></div>
-          <div class="menu-item" data-section="reportes"><i data-lucide="bar-chart-2" width="18" height="18"></i><span>Reportes</span></div>
-        </nav>
-      </div>
-    </div>
-
-    <!-- Main content -->
-    <main class="flex-1 p-6 lg:p-8">
-      <header class="hidden lg:flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-semibold">Dashboard</h1>
-          <div class="text-sm muted">Resumen general</div>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <div class="text-sm muted">Col</div>
-          <button id="btn-theme-desktop" class="p-2 rounded-md glass"><i data-lucide="sun" id="icon-theme-desktop" width="18" height="18"></i></button>
-          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-teal-400 flex items-center justify-center font-bold">E</div>
-        </div>
-      </header>
-
-      <!-- Top summary -->
-      <section class="mt-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="glass">
-            <div class="text-sm muted">Ventas del día</div>
-            <div class="mt-2 text-2xl font-bold">$1,420</div>
-            <div class="mt-3 text-xs muted">+12% vs ayer</div>
-          </div>
-          <div class="glass">
-            <div class="text-sm muted">Compras</div>
-            <div class="mt-2 text-2xl font-bold">$540</div>
-            <div class="mt-3 text-xs muted">-3% vs semana</div>
-          </div>
-          <div class="glass">
-            <div class="text-sm muted">Gastos</div>
-            <div class="mt-2 text-2xl font-bold">$230</div>
-            <div class="mt-3 text-xs muted">Estable</div>
-          </div>
-          <div class="glass">
-            <div class="text-sm muted">Inventario</div>
-            <div class="mt-2 text-2xl font-bold">1,280</div>
-            <div class="mt-3 text-xs muted">Productos activos</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Content sections -->
-      <section class="mt-6">
-        <!-- Dashboard (inicio) -->
-        <div id="section-inicio">
-          <div class="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div class="glass">
-              <div class="flex items-center justify-between">
-                <div>
-                  <div class="text-sm muted">Ventas últimos 6 meses</div>
-                  <div class="text-lg font-semibold">Tendencia mensual</div>
-                </div>
-                <div class="text-sm muted">Auto</div>
-              </div>
-              <div class="chart-wrap mt-4">
-                <canvas id="chart-inicio" style="max-height:240px"></canvas>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4">
-              <div class="glass">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <div class="text-sm muted">Ventas recientes</div>
-                    <div class="text-lg font-semibold">Últimos movimientos</div>
-                  </div>
-                  <div class="text-sm muted">Hoy</div>
-                </div>
-                <ul class="mt-4 text-sm muted space-y-3">
-                  <li class="flex justify-between"><span>Juan P.</span><span class="font-medium">$350</span></li>
-                  <li class="flex justify-between"><span>María L.</span><span class="font-medium">$210</span></li>
-                  <li class="flex justify-between"><span>Pedro D.</span><span class="font-medium">$690</span></li>
-                </ul>
-              </div>
-
-              <div class="glass">
-                <div class="text-sm muted">Alertas</div>
-                <div class="mt-2 text-sm muted">No hay alertas críticas</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Ventas -->
-        <div id="section-ventas" class="hidden">
-          <div class="glass">
-            <h2 class="text-lg font-semibold">Ventas</h2>
-            <p class="mt-2 muted text-sm">Registro y búsqueda de ventas.</p>
-          </div>
-        </div>
-
-        <!-- Compras -->
-        <div id="section-compras" class="hidden">
-          <div class="glass">
-            <h2 class="text-lg font-semibold">Compras</h2>
-            <p class="mt-2 muted text-sm">Compras y proveedores.</p>
-          </div>
-        </div>
-
-        <!-- Gastos -->
-        <div id="section-gastos" class="hidden">
-          <div class="glass">
-            <h2 class="text-lg font-semibold">Gastos</h2>
-            <p class="mt-2 muted text-sm">Control de gastos diarios.</p>
-          </div>
-        </div>
-
-        <!-- Inventario -->
-        <div id="section-inventario" class="hidden">
-          <div class="glass">
-            <h2 class="text-lg font-semibold">Inventario</h2>
-            <p class="mt-2 muted text-sm">Productos y stock por sucursal.</p>
-          </div>
-        </div>
-
-        <!-- Reportes -->
-        <div id="section-reportes" class="hidden">
-          <div class="glass">
-            <h2 class="text-lg font-semibold">Reportes</h2>
-            <p class="mt-2 muted text-sm">Exportes y análisis.</p>
-            <div class="chart-wrap mt-4">
-              <canvas id="chart-reportes" style="max-height:200px"></canvas>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
   </div>
 
   <script>
-    // Initialize Lucide icons
-    lucide.createIcons();
+    const loans = [
+      {
+        id: 1,
+        client: "Carlos Gómez",
+        amount: 1000,
+        balance: 700,
+        payments: [
+          { date: "2025-11-01", amount: 100 },
+          { date: "2025-11-05", amount: 200 },
+        ],
+      },
+      {
+        id: 2,
+        client: "Ana Pérez",
+        amount: 800,
+        balance: 300,
+        payments: [
+          { date: "2025-11-03", amount: 250 },
+        ],
+      },
+    ];
 
-    // Theme handling: persist in localStorage
-    (function(){
-      const root = document.documentElement;
-      const saved = localStorage.getItem('theme-mode') || 'dark';
-      if(saved === 'light') root.classList.add('light');
-      updateThemeIcon();
+    const app = document.getElementById("app");
+    const modal = document.getElementById("modal");
+    const paymentForm = document.getElementById("paymentForm");
+    const paymentAmount = document.getElementById("paymentAmount");
+    const cancelBtn = document.getElementById("cancelBtn");
+    let currentLoan = null;
 
-      function toggleTheme(){
-        if(root.classList.contains('light')) {
-          root.classList.remove('light');
-          localStorage.setItem('theme-mode','dark');
-        } else {
-          root.classList.add('light');
-          localStorage.setItem('theme-mode','light');
-        }
-        updateThemeIcon();
-      }
+    function renderLoans() {
+      app.innerHTML = "";
+      loans.forEach((loan) => {
+        const card = document.createElement("div");
+        card.className = "bg-white p-4 rounded-xl shadow";
 
-      function updateThemeIcon(){
-        const sunIcons = document.querySelectorAll('#icon-theme, #icon-theme-desktop');
-        const rootIsLight = root.classList.contains('light');
-        sunIcons.forEach(i => {
-          i.parentElement.innerHTML = rootIsLight
-            ? '<i data-lucide=\"moon\" width=\"18\" height=\"18\"></i>'
-            : '<i data-lucide=\"sun\" width=\"18\" height=\"18\"></i>';
-        });
-        lucide.createIcons();
-      }
+        card.innerHTML = `
+          <h2 class="text-lg font-semibold">${loan.client}</h2>
+          <p>Monto: $${loan.amount}</p>
+          <p>Saldo: $${loan.balance}</p>
 
-      // Bind buttons
-      document.getElementById('btn-theme').addEventListener('click', toggleTheme);
-      document.getElementById('btn-theme-desktop').addEventListener('click', toggleTheme);
-    })();
+          <div class="mt-3 flex gap-2">
+            <button class="bg-green-500 text-white px-3 py-1 rounded" onclick="openModal(${loan.id})">Registrar Pago</button>
+            <button class="bg-blue-500 text-white px-3 py-1 rounded" onclick="toggleHistory(${loan.id})">Historial</button>
+          </div>
 
-    // Sidebar / navigation logic
-    (function(){
-      function setActive(section){
-        // desktop menu items
-        document.querySelectorAll('.sidebar .menu-item').forEach(el => {
-          el.classList.toggle('active', el.dataset.section === section);
-        });
-        // mobile
-        document.querySelectorAll('#mobileSidebar .menu-item').forEach(el => {
-          el.classList.toggle('active', el.dataset.section === section);
-        });
-
-        // show/hide sections
-        const sections = ['inicio','ventas','compras','gastos','inventario','reportes'];
-        sections.forEach(s => {
-          const el = document.getElementById('section-' + s);
-          if(!el) return;
-          el.classList.toggle('hidden', s !== section);
-        });
-
-        // For mobile, close sidebar after selecting
-        hideMobileSidebar();
-      }
-
-      // Default section
-      setActive('inicio');
-
-      // Bind click events (both desktop and mobile)
-      document.querySelectorAll('[data-section]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const section = btn.getAttribute('data-section');
-          setActive(section);
-        });
+          <div id="history-${loan.id}" class="hidden mt-3 border-t pt-2 text-sm">
+            <h3 class="font-semibold mb-1">Historial de Pagos</h3>
+            ${loan.payments
+              .map(
+                (p) =>
+                  `<div class="flex justify-between"><span>${p.date}</span><span>$${p.amount}</span></div>`
+              )
+              .join("")}
+          </div>
+        `;
+        app.appendChild(card);
       });
+    }
 
-      // Mobile sidebar open/close
-      const mobileSidebar = document.getElementById('mobileSidebar');
-      const btnHamb = document.getElementById('btn-hamb');
-      const mobileBackdrop = document.getElementById('mobileBackdrop');
+    function toggleHistory(id) {
+      const el = document.getElementById(`history-${id}`);
+      el.classList.toggle("hidden");
+    }
 
-      function showMobileSidebar(){
-        mobileSidebar.classList.remove('hidden');
+    function openModal(id) {
+      currentLoan = loans.find((l) => l.id === id);
+      modal.classList.remove("hidden");
+    }
+
+    paymentForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const amount = Number(paymentAmount.value);
+      if (amount > 0 && currentLoan) {
+        const today = new Date().toISOString().split("T")[0];
+        currentLoan.payments.push({ date: today, amount });
+        currentLoan.balance -= amount;
+        renderLoans();
+        closeModal();
+        alert("✅ Pago registrado correctamente");
       }
-      function hideMobileSidebar(){
-        mobileSidebar.classList.add('hidden');
-      }
-      btnHamb.addEventListener('click', showMobileSidebar);
-      mobileBackdrop.addEventListener('click', hideMobileSidebar);
-    })();
+    });
 
-    // Charts init
-    (function(){
-      // Sales chart (inicio)
-      const ctx = document.getElementById('chart-inicio').getContext('2d');
-      const chartInicio = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Ene','Feb','Mar','Abr','May','Jun'],
-          datasets: [{
-            label: 'Ventas',
-            data: [1200,1900,800,1500,1700,2000],
-            borderRadius: 6,
-            maxBarThickness: 28,
-            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#3b82f6'
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display:false } },
-          scales: { y: { beginAtZero:true } }
-        }
-      });
+    cancelBtn.addEventListener("click", closeModal);
 
-      // Reportes chart (simple)
-      const ctx2 = document.getElementById('chart-reportes').getContext('2d');
-      const chartReportes = new Chart(ctx2, {
-        type: 'line',
-        data: {
-          labels: ['Semana 1','Semana 2','Semana 3','Semana 4'],
-          datasets: [{
-            label: 'Ingresos',
-            data: [3200, 4100, 3800, 4700],
-            fill: true,
-            tension: 0.3,
-            backgroundColor: 'rgba(59,130,246,0.12)',
-            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#3b82f6',
-            pointRadius: 3
-          }]
-        },
-        options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
-      });
+    function closeModal() {
+      modal.classList.add("hidden");
+      paymentAmount.value = "";
+    }
 
-      // Recreate lucide icons (because we dynamically modify some)
-      lucide.createIcons();
-    })();
+    // Inicializar
+    renderLoans();
   </script>
 </body>
 </html>
+
