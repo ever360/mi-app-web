@@ -1,1 +1,1 @@
-# mi-app-web
+# Kapital POS
