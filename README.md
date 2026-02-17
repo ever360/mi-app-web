@@ -1,1 +1,1 @@
-# Kapital POS
+# Kapital_app
